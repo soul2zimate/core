@@ -21,6 +21,8 @@
  */
 package org.jboss.as.console.client.shared.subsys.jca.wizard;
 
+import com.google.gwt.event.logical.shared.ValueChangeEvent;
+import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Widget;
 import org.jboss.as.console.client.shared.help.FormHelpPanel;
@@ -28,6 +30,7 @@ import org.jboss.as.console.client.shared.subsys.jca.model.DataSource;
 import org.jboss.as.console.client.shared.subsys.jca.model.XADataSource;
 import org.jboss.as.console.client.v3.widgets.wizard.WizardStep;
 import org.jboss.as.console.client.widgets.forms.items.NonRequiredTextBoxItem;
+import org.jboss.ballroom.client.widgets.forms.CheckBoxItem;
 import org.jboss.ballroom.client.widgets.forms.Form;
 import org.jboss.ballroom.client.widgets.forms.FormValidation;
 import org.jboss.ballroom.client.widgets.forms.PasswordBoxItem;
@@ -54,12 +57,26 @@ public class ConnectionStep<T extends DataSource> extends WizardStep<Context<T>,
         PasswordBoxItem pass = new PasswordBoxItem("password", "Password") {{
             setRequired(false);
         }};
+        CheckBoxItem displayPass = new CheckBoxItem("displayPass", "Show my password");
+        displayPass.setRequired(false);
+        displayPass.addValueChangeHandler(new ValueChangeHandler() {
+            @Override
+            public void onValueChange(ValueChangeEvent event) {
+                boolean selected = (boolean) event.getValue();
+                if (selected) {
+                    pass.getInputElement().setAttribute("type", "text");
+                } else {
+                    pass.getInputElement().setAttribute("type", "password");
+                }
+
+            }
+        });
         NonRequiredTextBoxItem domain = new NonRequiredTextBoxItem("securityDomain", "Security Domain");
 
         if (context.xa) {
-            form.setFields(user, pass, domain);
+            form.setFields(user, pass, displayPass, domain);
         } else {
-            form.setFields(connectionUrl, user, pass, domain);
+            form.setFields(connectionUrl, user, pass, displayPass, domain);
         }
 
         FlowPanel body = new FlowPanel();
